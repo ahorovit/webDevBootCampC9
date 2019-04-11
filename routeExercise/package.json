@@ -1,0 +1,23 @@
+{
+  "name": "route_exercise",
+  "version": "1.0.0",
+  "description": "route exercise",
+  "main": "app.js",
+  "scripts": {
+    "test": "test_app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "fake.com"
+  },
+  "keywords": [
+    "routing",
+    "app",
+    "node"
+  ],
+  "author": "shit gimble",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
