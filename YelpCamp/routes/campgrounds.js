@@ -11,7 +11,7 @@ router.get("/", function(req, res) {
         }
         else {
             // NOTE: if user is logged in, session will track req.user object
-            res.render("campgrounds/index", {campgrounds: allCampgrounds});
+            res.render("campgrounds/index", { campgrounds: allCampgrounds });
         }
     });
 });
@@ -27,7 +27,11 @@ router.post('/', isLoggedIn, function(req, res) {
     Campground.create({
         name: req.body.name,
         image: req.body.image,
-        description: req.body.description
+        description: req.body.description,
+        creator: {
+            id: req.user._id,
+            username: req.user.username
+        }
     }, function(err, newCampground) {
         if (err) {
             console.log(err);

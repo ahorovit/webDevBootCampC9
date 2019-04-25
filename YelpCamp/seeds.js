@@ -33,29 +33,29 @@ function seedDB() {
         }
         console.log("Removed Campgrounds!");
 
-        // Add a few campgrounds
-        // NOTE: This is in the callback of deleteMany because order of functions executing is not guaranteed otherwise
-        data.forEach(function(seedCG) {
-            Campground.create(seedCG, function(err, newCampground) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log("Created a Campground");
-                    Comment.create({
-                        text: "This place sucks",
-                        author: "Homer"
-                    }, function (err, newComment) {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            newCampground.comments.push(newComment);
-                            newCampground.save();
-                            console.log("Created New Comment");
-                        }
-                    });
-                }
-            });
-        });
+    //     // Add a few campgrounds
+    //     // NOTE: This is in the callback of deleteMany because order of functions executing is not guaranteed otherwise
+    //     data.forEach(function(seedCG) {
+    //         Campground.create(seedCG, function(err, newCampground) {
+    //             if (err) {
+    //                 console.log(err);
+    //             } else {
+    //                 console.log("Created a Campground");
+    //                 Comment.create({
+    //                     text: "This place sucks",
+    //                     author: "Homer"
+    //                 }, function (err, newComment) {
+    //                     if (err) {
+    //                         console.log(err);
+    //                     } else {
+    //                         newCampground.comments.push(newComment);
+    //                         newCampground.save();
+    //                         console.log("Created New Comment");
+    //                     }
+    //                 });
+    //             }
+    //         });
+    //     });
 
     });
 }
