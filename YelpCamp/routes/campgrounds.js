@@ -17,12 +17,12 @@ router.get("/", function(req, res) {
 });
 
 // NEW route - shows form to create new campground
-router.get("/new", function(req, res) {
+router.get("/new", isLoggedIn, function(req, res) {
     res.render("campgrounds/new");
 });
 
 // CREATE route - creates new campground
-router.post('/', function(req, res) {
+router.post('/', isLoggedIn, function(req, res) {
     // get data from form and add to campgorunds array
     Campground.create({
         name: req.body.name,
