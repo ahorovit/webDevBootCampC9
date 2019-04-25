@@ -2,11 +2,19 @@ var express = require("express"),
     app = express(),
     bodyParser = require("body-parser"),
     mongoose = require("mongoose"),
+    passport = require("passport"),
+    LocalStrategy = require("passport-local"),
     Campground = require("./models/campground"),
     Comment = require("./models/comment"),
+    User = require("./models/user"),
     seedDB = require("./seeds");
 
-mongoose.connect('mongodb://localhost:27017/yelp_camp_v3', { useNewUrlParser: true });
+// Requiring Routes
+var commentRoutes = require("./routes/comments"),
+    campgroundRoutes = require("./routes/campgrounds"),
+    indexRoutes = require("./routes/index");
+
+mongoose.connect('mongodb://localhost:27017/yelp_camp_v5', { useNewUrlParser: true });
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
@@ -14,95 +22,32 @@ app.use(express.static(__dirname + "/public"));
 // Clear Campgrounds and generate seed data
 seedDB();
 
-app.get("/", function(req, res) {
-    res.render("landing");
+// PASSPORT CONFIG
+app.use(require("express-session")({
+    secret: "MEAN Stack is Awesome!",
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Setup auth strategy and sessions
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// Pass logged in user to every template (middleware)
+app.use(function(req, res, next) {
+   res.locals.currentUser = req.user;
+   next();
 });
 
-// INDEX route - shows all campgrounds
-app.get("/campgrounds", function(req, res) {
-    // Get all campgrounds
-    Campground.find({}, function(err, allCampgrounds) {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            res.render("campgrounds/index", { campgrounds: allCampgrounds });
-        }
-    });
-});
+// ROUTES
+app.use("/", indexRoutes);  // Passing base route prepends to all routes in router file
+app.use("/campgrounds", campgroundRoutes);
+app.use("/campgrounds/:id/comments", commentRoutes);
 
-// NEW route - shows form to create new campground
-app.get("/campgrounds/new", function(req, res) {
-    res.render("campgrounds/new");
-});
-
-// CREATE route - creates new campground
-app.post('/campgrounds', function(req, res) {
-    // get data from form and add to campgorunds array
-    Campground.create({
-        name: req.body.name,
-        image: req.body.image,
-        description: req.body.description
-    }, function(err, newCampground) {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            res.redirect("/campgrounds");
-        }
-    });
-});
-
-// SHOW route -- shows details of one campground
-// NOTE: because this comes after NEW route, "new" will not be treated as an id
-app.get("/campgrounds/:id", function(req, res) {
-    // find campground with provided ID --> populate associated comments
-    Campground.findById(req.params.id).populate("comments").exec(function(err, found) {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            res.render("campgrounds/show", { campground: found });
-        }
-    });
-});
-
-
-// ========== Comments Routes =============
-
-// NEW Comment Route
-app.get("/campgrounds/:id/comments/new", function(req, res) {
-    Campground.findById(req.params.id, function(err, foundCampground) {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            res.render("comments/new", { campground: foundCampground });
-        }
-    });
-});
-
-// CREATE comment Route
-app.post("/campgrounds/:id/comments", function(req, res) {
-    Campground.findById(req.params.id, function(err, foundCampground) {
-        if (err) {
-            console.log(err);
-            res.redirect("/campgrounds");
-        }
-        else {
-            Comment.create(req.body.comment, function(err, newComment){
-                if (err) {
-                    console.log(err);
-                } else {
-                    foundCampground.comments.push(newComment);
-                    foundCampground.save();
-                }
-                res.redirect("/campgrounds/" + foundCampground._id);                
-            });
-        }
-    });
-});
-
+// App must listen on Port
 app.listen(process.env.PORT, process.env.IP, function() {
     console.log("YelpCamp Server Has Started!");
 });
