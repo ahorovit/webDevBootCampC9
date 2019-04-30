@@ -18,10 +18,11 @@ router.post("/register", function(req, res) {
     var newUser = {username: req.body.username};
     User.register(new User(newUser), req.body.password, function(err, createdUser) {
         if(err) {
-            console.log(err);
+            req.flash("error", err.message);
             return res.render("register"); // return short-circuits further functions
         }
         passport.authenticate("local")(req, res, function() {
+            req.flash("success", "Welcome to YelpCamp " + createdUser.username);
             res.redirect("/campgrounds");
         });
     });
@@ -35,7 +36,8 @@ router.get("/login", function(req, res) {
 // Validate login (use passport.authenticate middleware)
 router.post("/login", passport.authenticate("local", {
     successRedirect: "/campgrounds",
-    failureRedirect: "/login"
+    failureRedirect: "/login",
+    failureFlash: true
 }), function(req, res) {
     // callback not actually needed
 });
@@ -46,13 +48,5 @@ router.get("/logout", function(req, res) {
    req.flash("success", "Successfully logged out");
    res.redirect("/campgrounds");
 });
-
-// Middleware
-function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect("/login");
-}
 
 module.exports = router;
