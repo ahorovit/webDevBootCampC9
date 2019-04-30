@@ -27,6 +27,7 @@ router.post('/', middleware.isLoggedIn, function(req, res) {
     // get data from form and add to campgorunds array
     Campground.create({
         name: req.body.name,
+        price: req.body.price,
         image: req.body.image,
         description: req.body.description,
         creator: {
